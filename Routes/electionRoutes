@@ -1,0 +1,31 @@
+
+module.exports = app => {
+
+    const mongoose = require('mongoose')
+    const Election = mongoose.model('Election')
+
+    app.post('/api/election/new', async(req,res) => {
+            console.log(req.body)
+            let election = new Election();
+            election.name = req.body.name;
+            election.createdBy = req.session.user._id
+            let savedElection = await election.save()
+
+            res.send(savedElection)
+       
+    })
+
+    app.get('/api/election/all', async(req,res) => {
+        let election = await Election.find()
+        console.log(election)
+        res.send(election)
+    })
+
+    app.get('/api/election/one/:id', async(req,res) => {
+        let election = await Election.findById(req.params.id);
+        if(election){
+            res.send(election)
+        }
+    })
+}
+

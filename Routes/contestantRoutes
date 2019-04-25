@@ -1,0 +1,54 @@
+module.exports = (app) => {
+
+    const mongoose = require('mongoose')
+
+    const Election = mongoose.model('Election');
+    const Contestant = mongoose.model('Contestant');
+    const User = mongoose.model('user')
+
+
+    app.post('/api/contestant/new', async(req, res) => {
+
+        console.log('body' ,req.body);
+        let election = await Election.findOne({name: req.body.election});
+        console.log(election)
+        let certifyElectorate = await election.electorateUser.some(electorate => {
+                console.log(`potential  `,electorate)
+                console.log(`electorate  `,req.session.user._id)
+                return (electorate == req.session.user._id)
+            })
+
+        if(certifyElectorate){
+            let potentialContestant = await User.find({email: req.body.email})
+            if (potentialContestant){
+                let contestant = new Contestant()
+                contestant.identity = potentialContestant._id
+                contestant.election = election._id
+                contestant.registeredBy = req.session.user._id
+                let savedContestant = await contestant.save()
+                election.contestant = savedContestant._id
+                election.contestantNames = potentialContestant.name
+                await election.save()
+                res.send(savedContestant)
+            }else{
+                res.send("Error 2")
+            }
+            
+        }else{
+            res.send("Error")
+        }
+ 
+    })
+       
+    app.get("/api/contestant/all", async(req, res) =>  {
+        let contestant = await Contestant.find();
+        res.send(contestant)
+    })
+
+    app.get('api/voters/one/:id', async(req, res) => {
+        let contestant = await Contestant.findById(req.params.id)
+        res.send(contestant)
+    })
+
+}
+

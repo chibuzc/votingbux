@@ -1,0 +1,54 @@
+module.exports = app => {
+
+    const mongoose = require('mongoose')
+    const Electorate = mongoose.model('Electorate');
+    const User = mongoose.model('user')
+    const Election = mongoose.model('Election')
+     
+
+    app.post('/api/electorate/new', async(req, res) => {
+
+        
+            console.log(req.body);
+            let potentialElectorate = await User.findOne({email: req.body.email})
+            if (potentialElectorate){
+                console.log(`potential electorate `, potentialElectorate)
+                let election = await Election.findOne({name: req.body.election})
+                if(election){
+                    console.log(`election `,election)
+                    let electorate = new Electorate()
+                    electorate.identity = potentialElectorate._id
+                    electorate.officiatingElection = election._id
+                    electorate.registeredBy = req.session.user._id
+                    let updatedElectorate = await electorate.save()
+                    console.log(updatedElectorate)
+                    
+                    election.electorates = updatedElectorate._id
+                    election.electorateUser = potentialElectorate._id
+                    let updatedElection = await election.save()
+                    console.log(updatedElection)
+
+                    res.send(updatedElectorate)
+                }else{
+                    res.send("Oops! could not find election")
+                }   
+
+            }else{
+                res.send("You must be registered first")
+            }
+            
+
+        
+    })
+       
+    app.get("/api/electorate/all", async(req, res) => {
+        let electorate = await Electorate.find();
+        res.send(electorate)
+    })
+
+    app.get('/api/electorate/one/:id', async(req, res) => {
+        let electorate = await Electorate.findById(req.params.id)
+        res.send(electorate)
+    })
+
+}

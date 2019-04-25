@@ -1,0 +1,91 @@
+module.exports = app => {
+
+    const mongoose = require('mongoose')
+    const Election = mongoose.model('Election')
+    const Voter = mongoose.model('Voter')
+    const Contestant = mongoose.model('Contestant')
+
+    app.get('/api/vote_candidate/:electionId', async(req,res) => {
+        let voter = await Voter.find({identity: req.session.user._id})
+        let election = await Election.find({id: rq.params._id})
+
+        if(voter.eligibleElection !== []){
+            let potentialVoter = await voter.eligibleElection.some(election => {
+                console.log(`potential  `,election)
+                console.log(`election  `,req.params.electionId)
+                return (electorate == req.params.electionId)
+            })
+            let qualifiedVoter = await voter.participatedElection.some(election => {
+                console.log(`potential  `,election)
+                console.log(`election  `,req.params.electionId)
+                return (electorate !== req.params.electionId)
+            })
+
+            if(potentialVoter && qualifiedVoter){
+                res.send(election)
+            }else{
+                res.send(`error 2 `)
+            }
+        }else{
+            res.send("Error")
+        }
+        
+        
+
+        
+    
+    })
+
+    app.post('/api/vote_candidate/:electionId', async(req, res) => {
+
+       
+
+
+  
+        let voter = await Voter.find({identity: req.session.user.id})
+
+        if(voter.eligibleElection !== []){
+            let potentialVoter = await voter.eligibleElection.some(election => {
+                console.log(`potential  `,election)
+                console.log(`election  `,req.params.electionId)
+                return (electorate == req.params.electionId)
+            })
+            let qualifiedVoter = await voter.participatedElection.some(election => {
+                console.log(`potential  `,election)
+                console.log(`election  `,req.params.electionId)
+                return (electorate !== req.params.electionId)
+            })
+
+            if(potentialVoter && qualifiedVoter){
+                let contestant = await Contestant.find({name: req.body.contestant})
+                let vote = new Vote();
+                vote.electionId = req.params.electionId;
+                vote.contestantId = contestant._id
+                voterId = voter.id
+                voter.participatedElection = req.params.electionId
+                let updatedVoter = await voter.save()
+                let updatedVote = await vote.save()
+                res.send(updatedVote) 
+            }else{
+                res.send(`error 2 `)
+            }
+        }else{
+            res.send("Error")
+        }
+        
+        
+
+        
+    })
+       
+    app.get("/api/vote/all", async(req, res) => {
+        let vote = await Vote.find();
+        res.send(vote)
+    })
+
+    app.get('api/vote/one/:id', async(req, res) => {
+        let vote = await Vote.findById(req.params.id)
+        res.send(vote)
+    })
+
+}
