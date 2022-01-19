@@ -6,8 +6,6 @@ import { Provider } from 'react-redux';
 import { applyMiddleware, createStore } from 'redux';
 import reduxThunk from 'redux-thunk';
 import reducers from './reducers';
-// import './css/themify-icons.css'
-// import'./css/bootstrap.min.css'
 
 
 
